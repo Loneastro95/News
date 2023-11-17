@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from "react-native";
-
+import * as Sharing from "expo-sharing";
 import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
@@ -14,11 +14,16 @@ import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { red } from "@mui/material/colors";
+import { Linking } from "react-native";
 
 export default function App() {
   const [news, setNews] = useState([]);
 
-  
+  const [more, setMore] = useState('')
+
+  const gotoUrl = async (url) => {
+    Linking.openURL(url);
+  };
 
   useEffect(() => {
     getNews();
@@ -33,11 +38,18 @@ export default function App() {
     setNews(news.articles);
   }
 
+  const shareArticle = async (url) => {
+    try {
+      await Sharing.shareAsync(url);
+    } catch (error) {
+      console.error("Error sharing article:", error.message);
+    }
+  };
+  
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        {/* <Image
-         source={require("")}/> */}
+ 
         <Text style={styles.text}>TechCrunch</Text>
       </View>
 
@@ -54,8 +66,10 @@ export default function App() {
                 subheader={news.publishedAt}
               ></CardHeader>
               <CardActions>
-                <Button size="small">Share</Button>
-                <Button value={news.url} size="small">Read More</Button>
+              <Button size="small" onPress={() => shareArticle(newsItem.url)}>
+                Share
+              </Button>
+              <Button onClick={() => Linking.openURL(news.url)} size="small">Read More</Button>
               </CardActions>
             </Card>
           ))}
@@ -79,6 +93,8 @@ const styles = StyleSheet.create({
     height: '10%',
     justifyContent: "center",
     borderBottomEndRadius: 10,
+    borderBottomStartRadius: 10,
+
 
   },
   text: {
